@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit Form View to Modify it -->
+        <record id="odoo_inherit_form_crm_new" model="ir.ui.view">
+            <field name="name">CRM Form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <group name="lead_priority" position="before">
+                    <group>
+                        <field name="apn_crmunique_identifier" readonly="1"/>
+                        <field name="partner_crmunique_identifier" readonly="1" force_save="1"/>
+                        <field name="sent_to_aws" invisible="0" readonly="1"/>
+                        <field name="last_sent_to_aws_date" invisible="0" readonly="1"/>
+                        <field name="is_submitted" invisible="0" readonly="1"/>
+                        <field name="first_submission_to_aws_date" invisible="0" readonly="1"/>
+                        <field name="is_launched" invisible="0" readonly="1"/>
+                        <field name="launch_submission_to_aws_date" invisible="0" readonly="1"/>
+                        <field name="is_closed_lost" invisible="0" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="country_name" invisible="1"/>
+                        <field name="industryothers"
+                               attrs="{'invisible':[('check_ind_other', '!=', True)],'required':[('check_ind_other','=',True)]}"/>
+                        <field name="check_ind_other" invisible="1"/>
+                        <field name="is_public_sector" invisible="1"/>
+                    </group>
+                </group>
+                <xpath expr="//field[@name='industry_id']" position="attributes">
+                    <attribute name="string">ACE Industry</attribute>
+                    <attribute name="attrs">{'readonly':[('stage','=','Launched')]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='secondary_industry_ids']" position="attributes">
+                    <attribute name="string">Internal Industry</attribute>
+                </xpath>
+                <xpath expr="//field[@name='secondary_industry_ids']" position="after">
+                                <field name="contract_vehicle" attrs="{'required':[('is_public_sector','=',True)],'readonly':[('stage','=','Launched')]}"/>
+                                <field name="rfx_solicitation_number" attrs="{'required':[('is_public_sector','=',True)],'readonly':[('stage','=','Launched')]}"/>
+                </xpath>
+
+
+
+                <xpath expr="//field[@name='state_id']" position="attributes">
+                    <attribute name="attrs">{'required': [('country_name', '=', 'United States')]}</attribute>
+                </xpath>
+
+                <xpath expr="//page[@name='lead']" position="after">
+                    <page string="ACE Pipeline" attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <group string="OPPORTUNITY DETAILS">
+                            <group>
+                                <field name="partner_project_title"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_submitted','=',True),('is_launched','=',True)]}"/>
+                                <field name="project_description"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_submitted','=',True),('is_launched','=',True)]}"/>
+                                <field name="opportunity_owner_name"
+                                       />
+                                <field name="opportunity_owner_email"
+                                       />
+                            </group>
+                            <group>
+                                <field name="stage" attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="closed_lost_reason"
+                                       attrs="{'required': [('stage','=', 'Closed Lost')],'invisible':[('stage', '!=', 'Closed Lost')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                                <field name="status" readonly="1"
+                                    attrs="{'invisible':[('type', '=', 'lead')]}"/>
+                                <field name="target_close_date" attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="AWSCloseDate" readonly="1"/>
+
+                            </group>
+                        </group>
+                        <!-- Additional Details Group -->
+                        <group string="ADDITIONAL DETAILS">
+                            <group>
+                                <field name="partner_primary_need_from_aws"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="partner_primary_needfromAWSOther"
+                                        attrs="{'invisible':[('partner_primary_need_from_aws', '!=', 'Other')],'required':[('partner_primary_need_from_aws','=','Other'),('submit_to_AWS','=', 'Yes')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="usecase"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"
+                                       options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="sub_usecase"
+                                       options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="isMarketingDevelopmentFunded" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="opportunity_ownership" attrs="{'readonly': ['|',('status','=','Approved'),('sent_to_aws','=',True)]}"/>
+                                <field name="aws_leadSource" readonly="1"/>
+
+                            </group>
+                            <group>
+                                <field name="is_this_for_marketplace" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="delivery" widget="many2many_tags" options="{'no_create_edit':'1'}" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="expected_monthly_aws_revenue"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="aws_account_id"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('stage','=','Launched'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="isnet_newbusiness_forcompany"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                                <field name="is_this_for_resell" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                                <field name="aws_field_engagement"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="next_step" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="partner_acceptance_status"
+                                       attrs="{'required': [('submit_to_AWS','=', 'Yes'),('type', '!=', 'lead')],'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="additionalComments" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                            </group>
+                            <group>
+                                <field name="competitive_tracking" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+                                <field name="competitiveTrackingOther" attrs="{'readonly': ['|',('is_launched','=',True),('is_closed_lost','=',True)]}"/>
+
+                                <field name="isthis_apublic_reference"  attrs="{'readonly': [('is_launched','!=',True)],'invisible': [('is_launched','!=',True)]}"/>
+                                <field name="public_referenceUrl"  attrs="{'readonly': [('is_launched','!=',True)],'invisible': [('is_launched','!=',True)]}"/>
+                                <field name="public_referenceTitle"  attrs="{'readonly': [('is_launched','!=',True)],'invisible': [('is_launched','!=',True)]}"/>
+
+                                <field name="aws_last_modified_by" readonly="1"/>
+                                <field name="aws_last_modified_date" readonly="1"/>
+                                <field name="aWSStage" readonly="1"/>
+                                <field name="submit_to_AWS"/>
+                            </group>
+                        </group>
+                    </page>
+
+                    <page string="ACE Contacts" attrs="{'invisible': [('type', '=', 'lead')]}">
+
+                        <group>
+                            <!-- AWS ACCOUNT OWNER Group -->
+                            <group string="AWS Account Owner">
+                                <field name="aWSAccountOwnerName" readonly="1"/>
+                                <field name="aWSAccountOwnerEmail" readonly="1"/>
+                            </group>
+
+                            <!-- AWS SALE REP Group -->
+                            <group string="AWS SALE REP">
+                                <field name="aWSSalesRepName" readonly="1"/>
+                                <field name="aWSSalesRepEmail" readonly="1"/>
+                            </group>
+
+                            <!-- Partner Development Manager Group -->
+                            <group string="PARTNER DEVELOPMENT MANAGER">
+                                <field name="partnerDeveloperManager" readonly="1"/>
+                                <field name="partner_developer_manager_email" readonly="1"/>
+                            </group>
+                            <!-- WWPS partner Development Manager Group -->
+                            <group string="WWPS PARTNER DEVELOPMENT MANAGER ">
+                                <field name="wWPSPDM" readonly="1"/>
+                                <field name="wWPSPDMEmail" readonly="1"/>
+                            </group>
+                            <!-- AWS Partner Success Manager Group -->
+                            <group string="AWS PARTNER SUCCESS MANAGER (PSM)">
+                                <field name="aWSPartnerSuccessManagerName" readonly="1"/>
+                                <field name="aWSPartnerSuccessManagerEmail" readonly="1"/>
+                            </group>
+                            <!-- Additional Details Group -->
+                            <group string="AWS ISV SUCCESS MANAGER (ISM)">
+                                <field name="aWSISVSuccessManagerName" readonly="1"/>
+                                <field name="aWSISVSuccessManagerEmail" readonly="1"/>
+                            </group>
+                        </group>
+                    </page>
+
+                    <page string="ACE NextStep" attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <field name="next_step_history" readonly="1"/>
+                    </page>
+
+
+                    <page string="ACE Lead" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                        <group>
+                            <group>
+                                <field name="project_description" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <!--                                <field name="lead_source" attrs="{'invisible': [('type', '!=', 'lead')]}"/>-->
+                                <field name="current_lead_stage" attrs="{'invisible': [('type', '!=', 'lead')],'required': [('submit_to_AWS','=', 'Yes'),('type', '=', 'lead')]}"/>
+                                <field name="lead_age" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <field name="aws_campaign_name" attrs="{'invisible': [('type', '!=', 'lead')]}" readonly="1"/>
+                                <field name="campaign_member_status" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+
+                                <!--                                <field name="partner_project_title"-->
+                                <!--                                       invisible="1" attrs="{'invisible': [('type', '!=', 'lead')]}"/>-->
+                            </group>
+                            <group>
+                                <field name="lead_usecase" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <field name="partner_crm_lead_id" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <!--                                <field name="apn_crmunique_identifier" readonly="1" attrs="{'invisible': [('type', '!=', 'lead')]}"/>-->
+                                <field name="segment_company_size" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <field name="level_of_aws_usage" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <field name="lead_status"
+                                    attrs="{'invisible':[('type', '!=', 'lead')]}"/>
+                                <field name="lead_status_reason" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                                <field name="submit_to_AWS" attrs="{'invisible': [('type', '!=', 'lead')]}"/>
+                            </group>
+                        </group>
+
+                    </page>
+
+                    <page string="ACE API Response" >
+
+                        <field name="apn_api_response_history" readonly="1"/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

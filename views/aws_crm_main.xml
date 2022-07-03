@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit Form View to Modify it -->
+        <record id="crm_inherit_form_new" model="ir.ui.view">
+            <field name="name">CRM Form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                   <xpath expr="//field[@name='team_id']" position="after">
+                        <group>
+                            <field name="apn_crmunique_identifier" readonly="1"/>
+                            <field name="sent_to_aws" invisible="1" force_save="1" readonly="1"/>
+                            <field name="partner_crmunique_identifier" readonly="1" force_save="1"/>
+
+<!--                                                        <field name="country_name" invisible="1"/>-->
+                        </group>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>
